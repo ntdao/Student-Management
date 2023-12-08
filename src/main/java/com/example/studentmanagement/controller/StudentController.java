@@ -2,75 +2,108 @@ package com.example.studentmanagement.controller;
 
 import com.example.studentmanagement.dto.PageDto;
 import com.example.studentmanagement.dto.ResultDto;
-import com.example.studentmanagement.dto.StudentDto;
-import com.example.studentmanagement.service.StudentService;
-import lombok.RequiredArgsConstructor;
+import com.example.studentmanagement.dto.ResultDtoTest;
+import com.example.studentmanagement.dto.UserDto;
+import com.example.studentmanagement.entity.Result;
+import com.example.studentmanagement.entity.User;
+import com.example.studentmanagement.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.Tuple;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/students")
-@RequiredArgsConstructor
 public class StudentController {
     @Autowired
-    private StudentService studentService;
+    private UserService userService;
 
-    @GetMapping("/all")
-    public List<StudentDto> findAllStudents() {
-        return studentService.findAllStudentsDto();
+    @GetMapping()
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public List<User> findAllUser() {
+        return userService.findAllUsers();
     }
 
-    @PostMapping("/paging")
-    public List<StudentDto> findAllStudentsPaging(
-            @RequestParam(defaultValue = "0") Integer pageNo,
-            @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String order) {
-        return studentService.findAllStudentsPaging(pageNo, pageSize, sortBy, order);
+    @GetMapping("/all")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public List<UserDto> findAllUsers() {
+        return userService.findAllStudentDto();
     }
 
     @PostMapping("/page")
-    public List<StudentDto> findAllStudentsPageDto(@RequestBody PageDto pageDto) {
-        return studentService.findAllStudentsPageDto(pageDto);
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public List<UserDto> findAllUsersPageDto(@RequestBody PageDto pageDto) {
+        return userService.findAllUserPageDto(pageDto);
     }
 
     @GetMapping("/find/{id}")
-    public StudentDto findStudentById(@PathVariable("id") Long id) {
-        return studentService.findStudentById(id);
+    public UserDto findUserById(@PathVariable("id") Long id) {
+        return userService.findUserById(id);
     }
 
     @GetMapping("/find-by-student-code/{studentCode}")
-    public List<StudentDto> findStudentByStudentCode(@PathVariable("studentCode") String studentCode) {
-        return studentService.findStudentDtoByStudentCode(studentCode);
+    public List<UserDto> findUserByUserCode(@PathVariable("studentCode") String studentCode) {
+        return userService.findUserDtoByUserCode(studentCode);
     }
 
     @GetMapping("/find")
-    public List<StudentDto> findStudentByName(@RequestParam("name") String name) {
-        return studentService.findStudentByName(name);
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public List<UserDto> findUserByName(@RequestParam("name") String name) {
+        return userService.findUserByName(name);
     }
+
+    @PostMapping("/find")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public List<UserDto> findUserByName(@RequestBody Map<String, String> requestParams) {
+        return userService.findUserByName(requestParams.get("name"));
+    }
+
+    @GetMapping("/{id}/result-dto")
+    public List<ResultDto> findResultDtoByUser(@PathVariable("id") Long id) {
+        return userService.findStudentResultDto(id);
+    }
+
+    @GetMapping("/{id}/result-map")
+    public List<Map<String, Object>> findResultMapByUser(@PathVariable("id") Long id) {
+        return userService.findStudentResultMap(id);
+    }
+
+    @GetMapping("/{id}/result-tuple")
+    public List<Tuple> findResultTupleByUser(@PathVariable("id") Long id) {
+        return userService.findStudentResultTuple(id);
+    }
+
     @GetMapping("/{id}/result")
-    public List<ResultDto> findResultByStudent(@PathVariable("id") Long id) {
-        return studentService.findResultByStudent(id);
+    public List<ResultDtoTest> findResultByUser(@PathVariable("id") Long id) {
+        return userService.findResultByStudent(id);
+    }
+
+    @GetMapping("/{id}/student-result")
+    public List<ResultDtoTest> findResultByStudentId(@PathVariable("id") Long id) {
+        return userService.findResultByStudentId(id);
     }
 
     @PostMapping("/add")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addStudent(@RequestBody StudentDto studentDto) {
-        studentService.addStudent(studentDto);
+    public void addUser(@RequestBody @Validated User user) {
+        userService.addUser(user);
     }
 
     @PutMapping("/update/{id}")
-    public void updateStudent(@PathVariable("id") Long id,
-                              @RequestBody @Validated StudentDto studentDto) {
-        studentService.updateStudent(id, studentDto);
+    public void updateUser(@PathVariable("id") Long id,
+                           @RequestBody @Validated UserDto userDto) {
+        userService.updateUser(id, userDto);
     }
 
     @DeleteMapping("/delete/{id}")
-    public void deleteStudent(@PathVariable("id") Long id) {
-        studentService.deleteStudent(id);
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public void deleteUser(@PathVariable("id") Long id) {
+        userService.deleteUser(id);
     }
 }

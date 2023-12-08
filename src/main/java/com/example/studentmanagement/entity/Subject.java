@@ -1,10 +1,9 @@
 package com.example.studentmanagement.entity;
 
-import jakarta.persistence.*;
+import com.example.studentmanagement.dto.ResultDto;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.persistence.*;
 
 @Entity
 @Getter
@@ -12,6 +11,15 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+
+@NamedNativeQuery(name = "Subject.findById",
+        query = "select s.name, s.subject_code from subject s where s.id = :id",
+        resultSetMapping = "Mapping.Subject")
+@SqlResultSetMapping(name = "Mapping.Subject",
+        classes = @ConstructorResult(targetClass = Subject.class,
+                columns = {@ColumnResult(name = "name"),
+                        @ColumnResult(name = "subject_code")}))
+
 public class Subject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,8 +29,12 @@ public class Subject {
     @Column(nullable = false)
     private String subjectCode;
 
-    @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
-    private List<Result> resultList = new ArrayList<>();
+    public Subject(String name) {
+        this.name = name;
+    }
+
+    public Subject(String name, String subjectCode) {
+        this.name = name;
+        this.subjectCode = subjectCode;
+    }
 }
